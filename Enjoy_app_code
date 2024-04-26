@@ -1,0 +1,39 @@
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+@app.route('/recommendations', methods=['POST'])
+def recommendations():
+    data = request.get_json()
+    user_location = data.get('location', 'New York')  # Default location if not specified
+    user_type = data.get('user_type', 'Tourist')  # Default user type if not specified
+    tags = data.get('tags', [])  # Optional: tags to further filter activities
+
+    # Get recommendations based on location, user type, and optional tags
+    recommendations = get_recommendations(user_location, user_type, tags)
+
+    return jsonify(recommendations)
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+activities = [
+    {"name": "Empire State Building Observation Deck", "location": "New York", "type": "Sightseeing", "user_type": "Tourist", "tags": ["view", "photo-op"]},
+    {"name": "Statue of Liberty Cruise", "location": "New York", "type": "Tour", "user_type": "Tourist", "tags": ["boat", "history"]},
+    {"name": "Broadway Show", "location": "New York", "type": "Entertainment", "user_type": "Tourist", "tags": ["theatre", "music"]},
+    {"name": "Central Park Bike Tour", "location": "New York", "type": "Outdoor", "user_type": "Tourist", "tags": ["nature", "exercise"]},
+    {"name": "Local Food Festival", "location": "New York", "type": "Food", "user_type": "Local", "tags": ["food", "culture"]},
+    {"name": "Pottery Workshop", "location": "New York", "type": "Craft", "user_type": "Local", "tags": ["art", "workshop"]},
+    {"name": "Jazz Night at the Blue Note", "location": "New York", "type": "Music", "user_type": "Local", "tags": ["music", "nightlife"]},
+    {"name": "Community Yoga Class", "location": "New York", "type": "Wellness", "user_type": "Local", "tags": ["health", "community"]}
+]
+
+def get_recommendations(location, user_type, tags=None):
+    # Filter activities based on user location and type
+    recommended = [activity for activity in activities if activity['location'] == location and activity['user_type'] == user_type]
+    
+    # If tags are provided, further filter activities by tags
+    if tags:
+        recommended = [activity for activity in recommended if any(tag in activity['tags'] for tag in tags)]
+    
+    return recommended
